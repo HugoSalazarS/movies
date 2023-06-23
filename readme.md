@@ -16,13 +16,7 @@ The final deployment of the project is achieved using the Render tool, which ens
 
 To better understand the functionality and workflow of the project, an explanatory video has been prepared. This video provides a detailed walkthrough of the project, explaining each step and demonstrating the features and capabilities of the Movies Recommendation Project.
 
-## Requirements
+## Deploy
 
-The following dependencies are required to run the project:
-
-- numpy==1.24.2
-- pandas==1.5.3
-- fastapi==0.97.0
-
-Please refer to the dependencies.txt
+The model is deployed in render.com: [Movies Recomendation Project](https://movies-c2m9.onrender.com){:target="_blank"}
 

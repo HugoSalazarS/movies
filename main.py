@@ -7,6 +7,7 @@ from unidecode import unidecode
 import uvicorn
 from IPython.display import display
 from pandas import DataFrame
+import json
 
 
 # Instance api
@@ -29,8 +30,8 @@ def welcome_page():
     <p>The Movies Recommendation Project is designed to provide movie recommendations based on various criteria. It offers the following functions:</p>
     <ol>
         <li>This function calculates the number of films released in a specific month. The month input should be provided in Spanish language. <a href="/cantidad_filmaciones_mes/enero" target="_blank">Click here</a> to try this function.</li>
-        <li>This function calculates the number of films released in a specific day of the week. The day of the week should be provided in Spanish language. <a href="/total_films_day/lunes" target="_blank">Click here</a> to try this function.</li>
-        <li>This function returns the title, the year released, and the score of the movie. If there is more than one movie with the same title, it returns all of them. <a href="/score_title/cinderella" target="_blank">Click here</a> to try this function.</li>
+        <li>This function calculates the number of films released in a specific day of the week. The day of the week should be provided in Spanish language. <a href="/cantidad_filmaciones_dia/lunes" target="_blank">Click here</a> to try this function.</li>
+        <li>This function returns the title, the year released, and the score of the movie. If there is more than one movie with the same title, it returns all of them. <a href="/score_titulo/cinderella" target="_blank">Click here</a> to try this function.</li>
         <li>This function returns the title, the total number of votes, and the average vote value. <a href="/votos_titulo/Toy Story" target="_blank">Click here</a> to try this function.</li>
         <li>This function retrieves information about an actor, including the number of films they have participated in and the total return value. <a href="/get_actor/Tom Hanks" target="_blank">Click here</a> to try this function.</li>
         <li>This function retrieves information about a director, including the number of films they have directed and the total return value. <a href="/get_director/Steven Spielberg" target="_blank">Click here</a> to try this function.</li>
@@ -77,29 +78,25 @@ meses = {
 # 1 This function calculates the number of films released in a specific month. The month input should be provided in Spanish language.
 @app.get("/cantidad_filmaciones_mes/{mes}")
 def cantidad_filmaciones_mes(mes: str):
-
-    # Convert month to spanish
+    # Convert month to Spanish
     mes = mes.lower().strip()
 
-    # Verify if the month is  in the dict
+    # Verify if the month is in the dict
     if mes in meses:
+        # Get the corresponding English month name
         mes_en_ingles = meses[mes]
+        # Count the films with release dates containing the English month name
         cantidad = len(df[df["release_date"].str.contains(mes_en_ingles, case=False)])
+    else:
+        # Return a message indicating that no films were released in the month
+        return {'mes': mes, 'cantidad': f"No se encontraron películas estrenadas en el mes de {mes}"}
+
+    # respuesta = f"{cantidad} películas fueron estrenadas en el mes de {mes}"
+
+    # Return the month and the count of film releases
+    return {'mes': mes, 'cantidad': cantidad}
 
 
-
-    #cantidad = len(df[df["release_date"].str.contains(mes, case=False)])
-
-    if cantidad == 0:
-        return f"No se encontraron películas estrenadas en el mes de {mes}"
-
-    # Generate link to view the films for the given month
-    link_html = f'<a href="/view_films/{mes}" target="_blank">Ver películas</a>'
-
-    response = f"{cantidad} películas fueron estrenadas en el mes de {mes}"
-    response += f"<br/>{link_html}"
-
-    return HTMLResponse(content=response, status_code=200)
 
 @app.get("/view_films/{mes}")
 def view_films_mes(mes: str):
@@ -145,41 +142,42 @@ dias = {
         "domingo": "Sunday"
     }
 
-@app.get("/total_films_day/{dia}")
-def total_films_day(dia: str):
+@app.get("/cantidad_filmaciones_dia/{dia}")
+def cantidad_filmaciones_dia(dia: str):
+    # Convert the day string to lowercase and remove whitespace
     dia = dia.lower().strip()
 
-    if dia in dias:
-        dia_en_ingles = dias[dia]
+    if dia in dias: # Check if the day exists in the dias dictionary
+        dia_en_ingles = dias[dia] # Convert the day to English
         films = df[df["release_day"].str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8').str.lower().str.contains(dia_en_ingles, case=False)]
 
         if films.empty:
-            return f"No se encontraron películas estrenadas en los días {dia}"
+            return {'dia': dia, 'cantidad': f"No se encontraron películas estrenadas en los días {dia}"}
 
-        link_html = f'<a href="/view_films_day/{dia}" target="_blank">Ver películas</a>'
+        # respuesta = f"{len(films)} películas fueron estrenadas en los días {dia}"
 
-        response = f"{len(films)} películas fueron estrenadas en los días {dia}"
-        response += f"<br/>{link_html}"
-
-        return HTMLResponse(content=response, status_code=200)
+        # Return the day and the count of film releases
+        return {'dia': dia, 'cantidad': len(films)} 
     else:
-        return f"No se reconoce el día '{dia}'. Por favor, ingresa un día de la semana válido en español."
+        # Return message for unrecognized day
+        return {'dia': dia, 'cantidad': f"No se reconoce el día '{dia}'. Por favor, ingresa un día de la semana válido en español."}
 
-@app.get("/view_films_day/{dia}")
-def view_films_day(dia: str):
-    dia = dia.lower().strip()
 
-    if dia in dias:
-        dia_en_ingles = dias[dia]
+@app.get("/view_films_day/{day}")
+def view_films_day(day: str):
+    day = day.lower().strip()  # Convert the day string to lowercase and remove whitespace
+
+    if day in dias:  # Check if the day exists in the dias dictionary
+        dia_en_ingles = dias[day]  # Convert the day to English
         films = df[df["release_day"].str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8').str.lower().str.contains(dia_en_ingles, case=False)][["title", "release_year", "Director"]].sort_values(by="release_year")
 
         if films.empty:
-            return f"No se encontraron películas estrenadas en los días {dia}"
+            return f"No films were released on {day}"  # Return message for no films found
     
-    table_html = films.to_html(index=False)
+    table_html = films.to_html(index=False)  # Convert the films DataFrame to an HTML table
 
     # Set the page title
-    page_title = f"Películas estrenadas el día {dia}"
+    page_title = f"Films Released on {day}"
 
     # Embed the table in a complete HTML page
     complete_html = f"""
@@ -197,105 +195,115 @@ def view_films_day(dia: str):
     return HTMLResponse(content=complete_html, status_code=200)
 
 
+
 # 3 Returns the title, the year released and the score of the movie. If there is more than one movie with the same title, returns all of them
-@app.get("/score_title/{film_title}")
-def score_title(film_title: str):
+@app.get("/score_titulo/{film_title}")
+def score_titulo(film_title: str):
+    # Filter films based on the specified film title
     films = df[df["title"].str.lower() == film_title.lower()]
+    # Check if films are found
     if films.empty:
-        return "No se encontró la filmación especificada."
-
+        return {'titulo': film_title, 'anio': None, 'popularidad': "No se encontró la filmación especificada."}
+    # Sort films by release year in ascending order
     ordered_films = films.sort_values(by="release_year")
-
-    table_html = "<table>"
-    table_html += "<tr><th>Película</th><th>Año estreno</th><th>Score/Popularidad</th></tr>"
-
+    # Initialize an empty list to store the response
+    respuesta = []
+    # Iterate over the ordered films
     for index, row in ordered_films.iterrows():
+        # Extract the title, release year, and popularity score of each film
         title = row["title"]
         year_released = row["release_year"]
         score = row["popularity"]
+        # Create a dictionary for the film and add it to the response list
+        respuesta.append({'titulo': title, 'anio': year_released, 'popularidad': score})
 
-        table_html += "<tr>"
-        table_html += f"<td>{title}</td>"
-        table_html += f"<td>{year_released}</td>"
-        table_html += f"<td>{score}</td>"
-        table_html += "</tr>"
-
-    table_html += "</table>"
-
-    return HTMLResponse(content=table_html, status_code=200)
+    return respuesta
+    
 
 # 4 Returns the title, the total of votes and the vote average
 
-@app.get("/votos_titulo/{titulo_de_la_filmacion}", response_class=HTMLResponse)
-def votos_titulo(titulo_de_la_filmacion: str):
-    filmaciones = df[df["title"].str.lower() == titulo_de_la_filmacion.lower()]
-    
+@app.get("/votos_titulo/{titulo}")
+def votos_titulo(titulo:str):
+    # Filter films based on the specified film title
+    filmaciones = df[df["title"].str.lower() == titulo.lower()]
+    # Check if films are found
     if filmaciones.empty:
         return "No se encontró la filmación especificada."
     
+    # Initialize an empty list to store the responses
     respuestas = []
     
+    # Iterate over the filtered films
     for _, row in filmaciones.iterrows():
         cantidad_votos = row["vote_count"]
         
         if cantidad_votos < 2000:
-            continue  # Saltar esta película si no cumple con la cantidad mínima de votos
+            continue  # Skip this movie if you don't meet the minimum number of votes
         
+        # Extract the vote count, title, release year, and average vote of each film
         titulo = row["title"]
+        anio = row["release_year"]
         promedio_votos = row["vote_average"]
-        respuesta = f"<tr><td>{titulo}</td><td>{cantidad_votos}</td><td>{promedio_votos}</td></tr>"
+
+        # Create a dictionary for the film with its information
+        respuesta = {'titulo': titulo, 'anio': anio, 'voto_total': cantidad_votos, 'voto_promedio': promedio_votos}
         respuestas.append(respuesta)
-    
+
+    # Check if no films meet the minimum vote count requirement
     if not respuestas:
-        return f"<h1>No se encontraron filmaciones que cumplan con la cantidad mínima de votos requerida (2000 votos).</h1>"
+        return "No se encontraron filmaciones que cumplan con la cantidad mínima de votos requerida (2000 votos)."
     
-    tabla_html = "<table style='border-collapse: collapse; width: 100%;'>"
-    tabla_html += "<tr style='border-bottom: 1px solid #ddd;'><th style='padding: 8px; text-align: left;'>Título</th>"
-    tabla_html += "<th style='padding: 8px; text-align: left;'>Cantidad de votos</th>"
-    tabla_html += "<th style='padding: 8px; text-align: left;'>Valor promedio de votaciones</th></tr>"
-    tabla_html += "".join(respuestas)
-    tabla_html += "</table>"
-    
-    return f"<h1>Filmaciones con título '{titulo_de_la_filmacion}'</h1>{tabla_html}"
+    return respuesta
 
 
 # 5 Returns the total films and the average return
 @app.get("/get_actor/{actor_name}")
 def get_actor(actor_name):
+    # Filter films based on the specified actor name
     actor_films = df[df["actor_name"].str.contains(fr"\b{actor_name}\b", case=False, regex=True, na=False)]
     
+    # Check if films are found for the actor
     if actor_films.empty:
-        return "No se encontró el actor especificado."
-
+        return "The specified actor was not found."
+    
+    # Calculate the number of films for the actor
     film_count = len(actor_films)
-    total_return = actor_films["return"].sum()
-    average_return = total_return / film_count
-
-    respuesta = f"El actor {actor_name} ha participado en {film_count} filmaciones. Ha conseguido un retorno total de {total_return} con un promedio de {average_return} por filmación."
-    return respuesta
+    
+    # Calculate the total return of the actor's films
+    total_return = round(actor_films["return"].sum(),2)
+    
+    # Calculate the average return per film
+    average_return = round(total_return / film_count,2)
+    
+    # Return a dictionary containing the actor's name, the number of films, total return, and average return
+    return {'actor': actor_name, 'film_count': film_count, 'total_return': total_return, 'average_return': average_return}
 
 
 
 # 6 Returns the Director's information, how many films have been directed, and the total return value
 @app.get("/get_director/{director_name}")
 def get_director(director_name: str):
-    # Filter movies by director
+    # Filter movies based on the specified director name
     director_movies = df[df['Director'].str.contains(fr"\b{director_name}\b", case=False, regex=True, na=False)]
 
+    # Check if movies are found for the director
     if director_movies.empty:
-        return "No se encontró el director especificado."
+        return "The specified director was not found."
 
+    # Calculate the number of movies for the director
     film_count = len(director_movies)
-    total_return = director_movies['return'].sum()
-    answer = f"El director {director_name} ha dirigido {film_count} pelicula(s). Con un ROI total de {total_return}"
 
-    # HTML response
-    movies_table = director_movies[['Director', 'title', 'release_date', 'return', 'budget', 'revenue']]
-    movies_table_html = movies_table.to_html()
+    # Calculate the total return of the director's movies
+    total_return = round(director_movies['return'].sum(), 2)
 
-    # text and table generated
-    response_content = f"<h1>{answer}</h1>{movies_table_html}"
-    return HTMLResponse(content=response_content)
+    # Create a table of movies with selected columns and round the values to 2 decimal places
+    movies_table = round(director_movies[['title', 'release_year', 'return', 'budget', 'revenue']], 2)
+
+    
+    return {'Director': director_name,
+            'retorno_total_director': total_return,
+            'total_peliculas': film_count,
+            'peliculas': movies_table.to_dict(orient='records')}
 
 
 if __name__ == "__main__":

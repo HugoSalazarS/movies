@@ -8,6 +8,8 @@ import uvicorn
 from IPython.display import display
 from pandas import DataFrame
 import json
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 
 # Instance api
@@ -35,6 +37,7 @@ def welcome_page():
         <li>This function returns the title, the total number of votes, and the average vote value. <a href="/votos_titulo/Toy Story" target="_blank">Click here</a> to try this function.</li>
         <li>This function retrieves information about an actor, including the number of films they have participated in and the total return value. <a href="/get_actor/Tom Hanks" target="_blank">Click here</a> to try this function.</li>
         <li>This function retrieves information about a director, including the number of films they have directed and the total return value. <a href="/get_director/Steven Spielberg" target="_blank">Click here</a> to try this function.</li>
+        <li><b>This function retrieves 5 recomended Movies based on the title given by the user. <a href="/recomendacion/Twelve Monkeys" target="_blank">Click here</a> to try this function. </li>
     </ol>
     """
 
@@ -305,6 +308,44 @@ def get_director(director_name: str):
             'total_peliculas': film_count,
             'peliculas': movies_table.to_dict(orient='records')}
 
+# Remove rows with missing or null values in relevant columns
+df1 = df.drop(columns=['budget', 'id', 'revenue', 'release_date', 'status', 'runtime', 'actor_name', 'genre', 'character', 'collection', 'status', 'tagline', 'vote_count', 'id_collection', 'genre', 'companies_id', 'companies_name', 'countrie_name', 'lang_name', 'release_year', 'return', 'character', 'lang_name'])
+
+# Function to transform the columns
+def clean_column_values(df, column_name):
+    df[column_name] = df[column_name].astype(str).str.replace('[', '', regex=False)
+    df[column_name] = df[column_name].astype(str).str.replace(']', '', regex=False)
+    df[column_name] = df[column_name].astype(str).str.replace("'", '', regex=False)
+    return df
+
+clean_column_values(df1,'actor_id')
+clean_column_values(df1,'genre_id')
+
+# Create a term frequency matrix using CountVectorizer for relevant columns
+vectorizer = CountVectorizer()
+term_matrix = vectorizer.fit_transform(df1['genre_id']+ ' ' + df1['actor_id'] + ' ' + df1['popularity'].astype(str) + ' ' + df1['vote_average'].astype(str))
+
+# Function to get movies similar to a given movie
+def obtener_peliculas_similares(titulo, n=5):
+    titulo = titulo.lower()
+    indice_pelicula = df1[df1['title'].str.lower() == titulo].index
+    if len(indice_pelicula) == 0:
+        return 'No se encontró la película, revisa si está bien escrita'
+
+    indice_pelicula = indice_pelicula[0]
+    vector_pelicula = term_matrix[indice_pelicula]
+    similaridades = cosine_similarity(vector_pelicula, term_matrix)[0]
+    indices_similares = similaridades.argsort()[::-1][1:n+1]  # Exclude the given movie
+
+    # Sort the similar movies based on similarity score
+    indices_similares_sorted = sorted(indices_similares, key=lambda x: similaridades[x], reverse=True)
+    peliculas_similares = df1.iloc[indices_similares_sorted]['title'].tolist()
+    return peliculas_similares
+
+@app.get('/recomendacion/{titulo}')
+def recomendacion(titulo: str):
+    peliculas_recomendadas = obtener_peliculas_similares(titulo)
+    return {'lista recomendada': peliculas_recomendadas}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=10000)

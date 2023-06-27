@@ -1,0 +1,51 @@
+body {
+    text-align: left;
+    background-color: #0079FF;
+    font-size: larger;
+    color: white
+}
+
+h1 {
+    text-align: center;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 2px solid white;
+    color: white
+}
+
+th, td {
+    padding: 8px;
+    border: 2px solid white;
+}
+
+tr:nth-child(even) {
+    background-color: #0079FF;
+}
+
+tr:nth-child(odd) {
+    background-color: #00DFA2;
+    color: #0079FF;
+}
+
+footer {
+    text-align: center;
+    font-size: large;
+}
+
+a {
+    color: white;
+    text-decoration: underline;
+}
+
+a:hover {
+    background-color: white;
+    color: black;
+}
+
+.result-textarea {
+    width: 100%;
+    height: 50px;
+}

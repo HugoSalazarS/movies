@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="static/styles.css">
+
+<script src="static/script.js"></script>
+</head>
+<body>
+<h1>{{ title }}</h1>
+<h2>About the Project</h2>
+<p>The Movies Recommendation Project is designed to provide movie recommendations based on various criteria. It offers the following functions:</p>
+<table>
+    <tr>
+        <th>Function</th>
+        <th>Input</th>
+        <th>Output</th>
+        <th>Execute</th>
+    </tr>
+    <tr>
+        <td>This function calculates the number of films released in a specific month.</td>
+        <td><input type="text" id="monthInput" placeholder="Month in Spanish" onkeypress="handleKeyPress(event, '/cantidad_filmaciones_mes/{input}', this, document.getElementById('monthOutput'))"></td>
+        <td><textarea class="result-textarea" id="monthOutput"></textarea></td>
+        <td><button onclick="executeAction('/cantidad_filmaciones_mes/{input}', document.getElementById('monthInput'), document.getElementById('monthOutput'))">Execute</button></td>
+    </tr>
+    <tr>
+        <td>This function calculates the number of films released in a specific day of the week.</td>
+        <td><input type="text" id="dayInput" placeholder="Day of the week in Spanish" onkeypress="handleKeyPress(event, '/cantidad_filmaciones_dia/{input}', this, document.getElementById('dayOutput'))"></td>
+        <td><textarea class="result-textarea" id="dayOutput"></textarea></td>
+        <td><button onclick="executeAction('/cantidad_filmaciones_dia/{input}', document.getElementById('dayInput'), document.getElementById('dayOutput'))">Execute</button></td>
+    </tr>
+    <tr>
+        <td>This function returns the title, the year released, and the score of the movie.</td>
+        <td><input type="text" id="titleInput" placeholder="Movie title" onkeypress="handleKeyPress(event, '/score_titulo/{input}', this, document.getElementById('titleOutput'))"></td>
+        <td><textarea class="result-textarea" id="titleOutput"></textarea></td>
+        <td><button onclick="executeAction('/score_titulo/{input}', document.getElementById('titleInput'), document.getElementById('titleOutput'))">Execute</button></td>
+    </tr>
+    <tr>
+        <td>This function returns the title, the total number of votes, and the average vote value.</td>
+        <td><input type="text" id="votesInput" placeholder="Movie title" onkeypress="handleKeyPress(event, '/votos_titulo/{input}', this, document.getElementById('votesOutput'))"></td>
+        <td><textarea class="result-textarea" id="votesOutput"></textarea></td>
+        <td><button onclick="executeAction('/votos_titulo/{input}', document.getElementById('votesInput'), document.getElementById('votesOutput'))">Execute</button></td>
+    </tr>
+    <tr>
+        <td>This function retrieves information about an actor, including the number of films they have participated in and the total return value.</td>
+        <td><input type="text" id="actorInput" placeholder="Actor name" onkeypress="handleKeyPress(event, '/get_actor/{input}', this, document.getElementById('actorOutput'))"></td>
+        <td><textarea class="result-textarea" id="actorOutput"></textarea></td>
+        <td><button onclick="executeAction('/get_actor/{input}', document.getElementById('actorInput'), document.getElementById('actorOutput'))">Execute</button></td>
+    </tr>
+    <tr>
+        <td>This function retrieves information about a director, including the number of films they have directed and the total return value.</td>
+        <td><input type="text" id="directorInput" placeholder="Director name" onkeypress="handleKeyPress(event, '/get_director/{input}', this, document.getElementById('directorOutput'))"></td>
+        <td><textarea class="result-textarea" id="directorOutput"></textarea></td>
+        <td><button onclick="executeAction('/get_director/{input}', document.getElementById('directorInput'), document.getElementById('directorOutput'))">Execute</button></td>
+    </tr>
+    <tr>
+        <td>This function retrieves 5 recommended Movies based on the title given by the user.</td>
+        <td><input type="text" id="recommendationInput" placeholder="Movie title" onkeypress="handleKeyPress(event, '/recomendacion/{input}', this, document.getElementById('recommendationOutput'))"></td>
+        <td><textarea class="result-textarea" id="recommendationOutput"></textarea></td>
+        <td><button onclick="executeAction('/recomendacion/{input}', document.getElementById('recommendationInput'), document.getElementById('recommendationOutput'))">Execute</button></td>
+    </tr>
+</table>
+<p>Go directly to API documentation: <a href="/docs" target="_blank">HERE!</a></p>
+    <footer>
+        <p><h1>🌟 Created by Hugo Salazar 🌟</h1></p>
+        <p><a href="https://www.linkedin.com/in/hasalazars/">👨‍💼 LinkedIn</a></p>
+        <p><a href="https://github.com/HugoSalazarS">👨‍🔬 GitHub</a></p>
+    </footer>
+</body>
+</html>

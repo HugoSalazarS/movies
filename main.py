@@ -1,5 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 import pandas as pd
 from data import df
 import re
@@ -14,9 +16,15 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 # Instance api
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+templates = Jinja2Templates(directory="templates")
 
 @app.get("/", response_class=HTMLResponse)
-def welcome_page():
+def welcome_page(request: Request):
+    return templates.TemplateResponse("welcome.html", {"request": request, "title": "Welcome to 🎬 Movies Recommendation System 🍿"})
+
+'''def welcome_page():
     title = "Welcome to Movies Recommendation Project"
 
     footer = """
@@ -61,7 +69,7 @@ def welcome_page():
         {footer}
     </body>
     </html>
-    """
+    """'''
 
 meses = {
         "enero": "January",
@@ -263,7 +271,7 @@ def votos_titulo(titulo:str):
 @app.get("/get_actor/{actor_name}")
 def get_actor(actor_name):
     # Filter films based on the specified actor name
-    actor_films = df[df["actor_name"].str.contains(fr"\b{actor_name}\b", case=False, regex=True, na=False)]
+    actor_films = df[df["actor_name_funct"].str.contains(fr"\b{actor_name}\b", case=False, regex=True, na=False)]
     
     # Check if films are found for the actor
     if actor_films.empty:

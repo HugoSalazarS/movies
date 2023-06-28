@@ -324,6 +324,7 @@ def clean_column_values(df, column_name):
     df[column_name] = df[column_name].astype(str).str.replace('[', '', regex=False)
     df[column_name] = df[column_name].astype(str).str.replace(']', '', regex=False)
     df[column_name] = df[column_name].astype(str).str.replace("'", '', regex=False)
+    df[column_name] = df[column_name].astype(str).str.replace(",", '', regex=False)
     return df
 
 clean_column_values(df1,'actor_id')
@@ -331,7 +332,7 @@ clean_column_values(df1,'genre_id')
 
 # Create a term frequency matrix using CountVectorizer for relevant columns
 vectorizer = CountVectorizer()
-term_matrix = vectorizer.fit_transform(df1['genre_id'] + ' ' + df1['actor_id'] + ' ' + df1['title'] + ' ' + df1['popularity'].astype(str) + ' ' + df1['vote_average'].astype(str)+ ' ' + df1['overview'].astype(str))
+term_matrix = vectorizer.fit_transform(df1['genre_id'] + ' ' + df1['actor_id'] + ' ' + df1['popularity'].astype(str) + ' ' + df1['vote_average'].astype(str)+ ' ' + df1['overview'].astype(str))
 
 # Function to get movies similar to a given movie
 def obtener_peliculas_similares(titulo, n=5):

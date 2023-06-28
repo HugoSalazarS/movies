@@ -327,8 +327,9 @@ def clean_column_values(df, column_name):
     df[column_name] = df[column_name].astype(str).str.replace(",", '', regex=False)
     return df
 
-clean_column_values(df1,'actor_id')
-clean_column_values(df1,'genre_id')
+#clean_column_values(df1,'actor_id')
+#clean_column_values(df1,'genre_id')
+clean_column_values(df1,'overview')
 
 df1.dropna(subset='overview', inplace=True)
 

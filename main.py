@@ -319,7 +319,7 @@ def get_director(director_name: str):
 # Remove rows with missing or null values in relevant columns
 df1 = df.drop(columns=['budget', 'id', 'revenue', 'release_date', 'status', 'runtime', 'actor_name', 'genre', 'character', 'collection', 'status', 'tagline', 'vote_count', 'id_collection', 'genre', 'companies_id', 'companies_name', 'countrie_name', 'lang_name', 'release_year', 'return', 'character', 'lang_name'])
 
-# Function to transform the columns
+# Function to transform the columns for the vectrizer
 def clean_column_values(df, column_name):
     df[column_name] = df[column_name].astype(str).str.replace('[', '', regex=False)
     df[column_name] = df[column_name].astype(str).str.replace(']', '', regex=False)
@@ -330,9 +330,11 @@ def clean_column_values(df, column_name):
 clean_column_values(df1,'actor_id')
 clean_column_values(df1,'genre_id')
 
+df1.dropna(subset='overview', inplace=True)
+
 # Create a term frequency matrix using CountVectorizer for relevant columns
 vectorizer = CountVectorizer()
-term_matrix = vectorizer.fit_transform(df1['genre_id'] + ' ' + df1['popularity'].astype(str) + ' ' + df1['vote_average'].astype(str)+ ' ' + df1['overview'].astype(str))
+term_matrix = vectorizer.fit_transform(df1['popularity'].astype(str) + ' ' + df1['vote_average'].astype(str)+ ' ' + df1['overview'].astype(str))
 
 # Function to get movies similar to a given movie
 def obtener_peliculas_similares(titulo, n=5):

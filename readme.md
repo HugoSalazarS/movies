@@ -69,6 +69,8 @@ Download the original dataset [here](https://drive.google.com/drive/folders/11My
 
 To better understand the functionality and workflow of the project, an explanatory video has been prepared. This video provides a detailed walkthrough of the project, explaining each step and demonstrating the features and capabilities of the Movies Recommendation Project.
 
+To watch the video click [here](https://youtu.be/A2VRDEdOn30)
+
 ## Setup in your local machine
 
 Follow these steps to set up the project on your local machine.
